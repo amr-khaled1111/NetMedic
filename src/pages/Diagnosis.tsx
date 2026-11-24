@@ -1,5 +1,4 @@
-import React, { useState } from 'react'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import {
   Brain, Play, AlertTriangle, CheckCircle, ChevronRight,
   Cpu, Radio, TrendingUp, Zap, Info, RefreshCw
