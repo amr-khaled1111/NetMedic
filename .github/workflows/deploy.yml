@@ -1,0 +1,63 @@
+name: Deploy NetMedic to GitHub Pages
+
+on:
+  # Run on every push to main
+  push:
+    branches:
+      - main
+  # Allow manual runs from the Actions tab
+  workflow_dispatch:
+
+# Grant the workflow the minimum permissions needed to deploy to Pages
+permissions:
+  contents: read      # read repository source
+  pages: write        # write to GitHub Pages
+  id-token: write     # required by the pages/deploy action for OIDC auth
+
+# Allow only one concurrent deployment; cancel any in-progress run
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
+        # Vite reads base: '/NetMedic/' from vite.config.ts automatically
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Upload the Vite output directory
+          path: dist
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+
+    # Target the GitHub Pages environment (required for OIDC deployment)
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
